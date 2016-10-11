@@ -49,35 +49,52 @@ DEGREE_SIGN = u'\N{DEGREE SIGN}'
  # Weather
  #
 class Weather:
-    dayInfo = [None] * 5
+    dayInfo      = [None] * 5
+    currentStats = None
 
     class __Weather:
-        def __init__(self, root, rightFrame, width, height):
+        def __init__(self, root, rightFrame, width, height, today):
             self.root   = root
             self.canvas = Canvas(rightFrame, width = width, height = height)
             self.canvas.pack(fill=BOTH, expand=YES)
 
-            for i in range(5):
-                Weather.dayInfo[i] = Text(self.canvas,
+            if not today:
+                for i in range(5):
+                    Weather.dayInfo[i] = Text(self.canvas,
+                        width               = 50,
+                        height              = 1,
+                        background          = '#050D10',
+                        borderwidth         = 1,
+                        highlightbackground = "#06CFEF")
+
+                    Weather.dayInfo[i].pack(side=TOP,
+                        fill=BOTH,
+                        expand=YES,
+                        )  ###
+            else:
+                Weather.currentStats = Text(self.canvas,
                     width               = 50,
-                    height              = 1,
+                    height              = 6,
                     background          = '#050D10',
                     borderwidth         = 1,
                     highlightbackground = "#06CFEF")
 
-                Weather.dayInfo[i].pack(side=TOP,
+                Weather.currentStats.pack(side=TOP,
                     fill=BOTH,
                     expand=YES,
                     )  ###
 
 
-    def __init__(self, root, rightFrame, width, height):
-        if not Weather.dayInfo[0]:
-            Weather.__Weather(root, rightFrame, width, height)
+    def __init__(self, root, rightFrame, width, height, today):
+        if not Weather.dayInfo[0] or not Weather.currentStats:
+            Weather.__Weather(root, rightFrame, width, height, today)
         else:
             self.deleteCurrent()
 
-        self.printWeather()
+        if not today:
+            self.printWeather()
+        else:
+            self.todaysWeather()
 
 
     def get_weather_from_weather_com(self, location_id, units = 'imperial'):
@@ -280,6 +297,95 @@ class Weather:
                 justify     = CENTER)
 
             counter += 1
+
+
+    def todaysWeather(self):
+        weather_com_result = self.get_weather_from_weather_com('29678')
+
+        dayWeather = weather_com_result['current_conditions']
+        forecast   = weather_com_result['forecasts'][0]
+        # dayWeather = "Currently %s and %s \n Feels like: %s \n Humidity: %s%% \n Visiblity: %s miles \n Wind: %s mph %s" % (dayWeather['temperature'], dayWeather['text'], dayWeather['feels_like'], dayWeather['humidity'], dayWeather['visibility'], dayWeather['wind']['speed'], dayWeather['wind']['text'])
+
+        # Weather.currentStats.insert('1.0', dayWeather, ('dayTitle'))
+        # Weather.currentStats.tag_configure('dayTitle',
+        #     background  = 'black',
+        #     font        = 'helvetica 24 bold',
+        #     relief      = 'raised',
+        #     foreground  = '#18CAE6',
+        #     borderwidth = 0,
+        #     justify     = CENTER)
+
+        currentTemp         = "%s%sF\n" % (dayWeather['temperature'], DEGREE_SIGN)
+        # currentConditions = "%s | Feels like: %s%sF\n" % (dayWeather['text'], dayWeather['feels_like'], DEGREE_SIGN)
+        # forecast          = "High: %s%sF \n Low: %s%sF\n" % (forecast['high'], DEGREE_SIGN, forecast['low'], DEGREE_SIGN)
+        feelsLike           = '\nFeels like %s%sF\n' % (dayWeather['feels_like'], DEGREE_SIGN)
+        temp                = "%s/%s%sF\n" % (forecast['high'], forecast['low'], DEGREE_SIGN)
+        other               = "Humidity: %s%% \n Visiblity: %s miles \n Wind: %s mph %s" % (dayWeather['humidity'], dayWeather['visibility'], dayWeather['wind']['speed'], dayWeather['wind']['text'])
+
+        Weather.currentStats.insert('1.0', currentTemp, 'currentTemp')
+        Weather.currentStats.tag_configure('currentTemp',
+            background  = '#050D10',
+            font        = 'helvetica 75',
+            relief      = 'raised',
+            foreground  = '#06CFEF',
+            borderwidth = 0,
+            justify     = CENTER)
+
+        Weather.currentStats.insert('2.0', dayWeather['text'], 'textCondition')
+        Weather.currentStats.tag_configure('textCondition',
+            background  = '#050D10',
+            font        = 'helvetica 32',
+            relief      = 'raised',
+            foreground  = '#015da1',
+            borderwidth = 0,
+            justify     = CENTER)
+
+        Weather.currentStats.insert('4.0', feelsLike, 'feelsLike')
+        Weather.currentStats.tag_configure('feelsLike',
+            background  = '#050D10',
+            font        = 'helvetica 18',
+            relief      = 'raised',
+            foreground  = '#015da1',
+            borderwidth = 0,
+            justify     = CENTER)
+
+        Weather.currentStats.insert('5.0', "\n", ('blank'))
+        Weather.currentStats.tag_configure('blank',
+            background  = '#050D10',
+            font        = 'helvetica 12',
+            relief      = 'raised',
+            foreground  = '#06CFEF',
+            borderwidth = 0,
+            justify     = CENTER)
+
+        Weather.currentStats.insert('6.0', temp, 'temp')
+        Weather.currentStats.tag_configure('temp',
+            background  = '#050D10',
+            font        = 'helvetica 42',
+            relief      = 'raised',
+            foreground  = '#06CFEF',
+            borderwidth = 0,
+            justify     = CENTER)
+
+        Weather.currentStats.insert('7.0', "\n", ('blank2'))
+        Weather.currentStats.tag_configure('blank2',
+            background  = '#050D10',
+            font        = 'helvetica 12',
+            relief      = 'raised',
+            foreground  = '#06CFEF',
+            borderwidth = 0,
+            justify     = CENTER)
+
+        Weather.currentStats.insert('8.0', other, ('other'))
+        Weather.currentStats.tag_configure('other',
+            background  = '#050D10',
+            font        = 'helvetica 18',
+            relief      = 'raised',
+            foreground  = '#015da1',
+            borderwidth = 0,
+            justify     = CENTER)
+
+
 
 
 
@@ -887,9 +993,10 @@ class Layout:
         Verse(Layout.root, Layout.bottomLeftFrame, Layout.width / 2, Layout.height + 25)
 
 
-    ### add weather to right frame
+    ### add current weather to top left and week forcast to right frame
     def updateWeather(self):
-        Weather(Layout.root, Layout.rightFrame, Layout.width / 4, Layout.height + 25)
+        Weather(Layout.root, Layout.topLeftFrame, Layout.width / 2, Layout.height + 25, True)
+        Weather(Layout.root, Layout.rightFrame, Layout.width / 4, Layout.height + 25, False)
 
 
     ### add clock to middle frame
