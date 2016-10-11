@@ -216,9 +216,11 @@ class Weather:
         # for dayForecast in weather_com_result['forecasts']:
             # print "%s \t High: %sF \t Low: %sF\n" % (dayForecast['day_of_week'], dayForecast['high'], dayForecast['low'])
 
-        # todaysWeather = "\n\nIt is " + weather_com_result['current_conditions']['text'].lower() + " and " + weather_com_result['current_conditions']['temperature'] + "" + DEGREE_SIGN +"F now in Seneca."
-        dayForecast = weather_com_result['forecasts'][1]
-        dayWeather = "%s, %s \n High: %sF \n Low: %sF \n Day: %s (%s%% precip) \n Night: %s (%s%% precip)" % (dayForecast['day_of_week'], dayForecast['date'], dayForecast['high'], dayForecast['low'], dayForecast['day']['text'], dayForecast['day']['chance_precip'], dayForecast['night']['text'], dayForecast['night']['chance_precip'])
+        dayWeather = weather_com_result['current_conditions']
+        dayWeather = "Currently %s and %s \n Feels like: %s \n Humidity: %s%% \n Visiblity: %s miles \n Wind: %s mph %s" % (dayWeather['temperature'], dayWeather['text'], dayWeather['feels_like'], dayWeather['humidity'], dayWeather['visibility'], dayWeather['wind']['speed'], dayWeather['wind']['text'])
+        # dayWeather = "\n\nIt is " + weather_com_result['current_conditions']['text'].lower() + " and " + weather_com_result['current_conditions']['temperature'] + "" + DEGREE_SIGN +"F now in Seneca."
+        # dayForecast = weather_com_result['forecasts'][0]
+        # dayWeather = "%s, %s \n High: %sF \n Low: %sF \n Day: %s (%s%% precip) \n Night: %s (%s%% precip)" % (dayForecast['day_of_week'], dayForecast['date'], dayForecast['high'], dayForecast['low'], dayForecast['day']['text'], dayForecast['day']['chance_precip'], dayForecast['night']['text'], dayForecast['night']['chance_precip'])
 
         self.day_title = Text(self.canvas,
             width               = 100,
